@@ -40,25 +40,17 @@ jobs:
           mapfile -t files < <(git diff --name-only "$BASE" "$HEAD" | grep -Ei '\.json$')
           echo "→ All .json files: ${files[*]:-<none>}"
 
-          # Case-insensitive filter for “poll”
-          filtered=()
-          for f in "${files[@]}"; do
-            if [[ "$f" =~ [Pp]oll ]]; then
-              filtered+=("$f")
-            fi
-          done
-
-          if [ ${#filtered[@]} -eq 0 ]; then
-            echo "→ No polling JSON files changed; skipping validation."
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "→ No JSON files changed; skipping validation."
             echo "JSON_PAYLOAD_PATH=empty" >> $GITHUB_ENV
             exit 0
           fi
 
-          echo "→ Polling files: ${filtered[*]}"
+          echo "→ JSON files: ${files[*]}"
 
           # Build JSON array payload
           json_array="["
-          for f in "${filtered[@]}"; do
+          for f in "${files[@]}"; do
             if jq -e . "$f" > /dev/null; then
               content=$(jq -c . "$f")
               json_array+="{\"filename\":\"$f\",\"content\":$content},"
@@ -77,9 +69,7 @@ jobs:
         run: |
 
           echo "🔐 Fetching OIDC token…"
-          raw=$(curl -s \
-            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=api://${CLIENT_ID}")
+          raw=$(curl -s             -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=api://${CLIENT_ID}")
           token=$(echo "$raw" | jq -r .value)
           echo "✔️ Got token (length=${#token})"
           echo "TOKEN=$token" >> $GITHUB_ENV
@@ -91,9 +81,7 @@ jobs:
 
           echo "🚀 Hitting $API_BASE…"
           # Capture both body and status
-          resp=$(curl -s -w "\n%{http_code}" \
-            -H "Authorization: Bearer $TOKEN" \
-            "$API_BASE")
+          resp=$(curl -s -w "\n%{http_code}"             -H "Authorization: Bearer $TOKEN"             "$API_BASE")
           body=$(echo "$resp" | sed '$d')       # all but last line
           status=$(echo "$resp" | tail -n1)    # last line
           
