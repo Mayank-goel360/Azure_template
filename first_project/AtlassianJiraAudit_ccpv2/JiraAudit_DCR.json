@@ -2,7 +2,6 @@
     "name": "AtlassianJIRADCR",
     "apiVersion": "2021-09-01-preview",
     "type": "Microsoft.Insights/dataCollectionRules",
-    "location": "{{location}}",
     "properties": {
         "dataCollectionEndpointId": "{{dataCollectionEndpointId}}",
         "streamDeclarations": {
