@@ -262,7 +262,7 @@ jobs:
       - name: POST _CL payload
         if: env.JSON__CL_PATH != 'empty'
         run: |
-          response=$(curl -s -X POST "$API_BASE/cl" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary "@$JSON__CL_PATH")
+          response=$(curl -s -X POST "$API_BASE/table_CL" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary "@$JSON__CL_PATH")
           result_status=$(echo "$response" | jq -r '.status // empty')
           message=$(echo "$response" | jq -r '.message // "No message provided"')
           if [ "$result_status" != "passed" ]; then
