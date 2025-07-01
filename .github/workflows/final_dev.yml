@@ -1,4 +1,4 @@
-name: final PR code 
+name: final PR code dev
 
 on:
   pull_request_target:
@@ -14,7 +14,7 @@ permissions:
 
 env:
   CLIENT_ID: da7fd62a-590e-4e7a-8525-55ea01ffb1ac
-  API_BASE: https://sentinel-content-validationapi-prod-bvgsc3hjhyeqangg.canadacentral-01.azurewebsites.net/
+  API_BASE: https://sentinel-content-validation-dev-edbve7bwfjbaa6cc.canadacentral-01.azurewebsites.net/
 
 jobs:
   pr-validate:
