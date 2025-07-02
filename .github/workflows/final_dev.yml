@@ -75,7 +75,7 @@ jobs:
           echo "TOKEN=$token" >> $GITHUB_ENV
 
 
-      - name: 📡 Health-check GET
+      - name: Health-check GET
         if: env.JSON_PAYLOAD_PATH != 'empty'
         run: |
 
@@ -99,7 +99,7 @@ jobs:
             exit 1
           fi
 
-      - name: 📦 POST polling payload
+      - name: 📦 POST CCP payload
         if: env.JSON_PAYLOAD_PATH != 'empty'
         run: |
           echo "Sending JSON payload to API"
