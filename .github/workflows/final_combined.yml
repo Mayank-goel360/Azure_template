@@ -1,4 +1,4 @@
-name: final PR code 
+name: CCP data connector validation 
 
 on:
   pull_request_target:
@@ -75,7 +75,7 @@ jobs:
           echo "TOKEN=$token" >> $GITHUB_ENV
 
 
-      - name:  Health-check GET
+      - name:  Health-check 
         if: env.JSON_PAYLOAD_PATH != 'empty'
         run: |
 
@@ -110,7 +110,7 @@ jobs:
           message=$(echo "$response" | jq -r '.message // "No message provided"')
 
           if [ "$result_status" != "passed" ]; then
-            echo -e " ❌ Validation failed: \n $message"
+            echo -e " ❌ Validation failed: \n \n $message"
             exit 1
           fi
 
