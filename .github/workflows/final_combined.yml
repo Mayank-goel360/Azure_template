@@ -104,7 +104,7 @@ jobs:
         run: |
           echo "Sending JSON payload to API"
 
-          response=$(curl -s -X POST "$API_BASE/CCP_dataconnector" \ -H "Authorization: Bearer $TOKEN" \-H "Content-Type: application/json" \-H "Source: GitHub" \--data-binary "@$JSON_PAYLOAD_PATH")
+          response=$(curl -s -X POST "$API_BASE/CCP_dataconnector"  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -H "Source: GitHub" --data-binary "@$JSON_PAYLOAD_PATH")
 
           result_status=$(echo "$response" | jq -r '.status // empty')
           message=$(echo "$response" | jq -r '.message // "No message provided"')
