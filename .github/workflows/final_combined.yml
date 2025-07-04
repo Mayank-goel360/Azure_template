@@ -1,4 +1,4 @@
-name: final PR code 
+name: CCP data connector validation 
 
 on:
   pull_request_target:
@@ -33,7 +33,7 @@ jobs:
         id: prepare_json_files
         run: |
 
-          echo "🔍 Collecting changed JSON files…"
+          echo " Collecting changed JSON files…"
           BASE="${{ github.event.pull_request.base.sha }}"
           HEAD="${{ github.event.pull_request.head.sha }}"
 
@@ -68,18 +68,18 @@ jobs:
         id: fetch_token
         run: |
 
-          echo "🔐 Fetching OIDC token…"
+          echo " Fetching OIDC token…"
           raw=$(curl -s             -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=api://${CLIENT_ID}")
           token=$(echo "$raw" | jq -r .value)
           echo "✔️ Got token (length=${#token})"
           echo "TOKEN=$token" >> $GITHUB_ENV
 
 
-      - name: 📡 Health-check GET
+      - name:  Health-check 
         if: env.JSON_PAYLOAD_PATH != 'empty'
         run: |
 
-          echo "🚀 Hitting $API_BASE…"
+          echo " Hitting $API_BASE…"
           # Capture both body and status
           resp=$(curl -s -w "\n%{http_code}"             -H "Authorization: Bearer $TOKEN"             "$API_BASE")
           body=$(echo "$resp" | sed '$d')       # all but last line
@@ -99,18 +99,18 @@ jobs:
             exit 1
           fi
 
-      - name: 📦 POST polling payload
+      - name: POST CCP payload
         if: env.JSON_PAYLOAD_PATH != 'empty'
         run: |
           echo "Sending JSON payload to API"
 
-          response=$(curl -s -X POST "$API_BASE/dataConnector" -H "Authorization: Bearer $TOKEN"  -H "Content-Type: application/json"   --data-binary "@$JSON_PAYLOAD_PATH")
+          response=$(curl -s -X POST "$API_BASE/CCP_dataconnector" \ -H "Authorization: Bearer $TOKEN" \-H "Content-Type: application/json" \-H "Source: GitHub" \--data-binary "@$JSON_PAYLOAD_PATH")
 
           result_status=$(echo "$response" | jq -r '.status // empty')
           message=$(echo "$response" | jq -r '.message // "No message provided"')
 
           if [ "$result_status" != "passed" ]; then
-            echo -e " ❌ Validation failed: \n $message"
+            echo -e " ❌ Validation failed: \n \n $message"
             exit 1
           fi
 
