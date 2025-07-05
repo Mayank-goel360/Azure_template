@@ -8,14 +8,12 @@
             "name": "Jira_Audit_v2_CL",
             "columns": [
                 {
-                    "name": "AssociatedItems",
                     "type": "dynamic",
                     "isDefaultDisplay": false,
                     "isHidden": false
                 },
                 {
                     "name": "UserSid",
-                    "type": "string",
                     "isDefaultDisplay": false,
                     "isHidden": false
                 },
