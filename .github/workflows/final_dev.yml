@@ -99,7 +99,7 @@ jobs:
             exit 1
           fi
 
-      - name: POST CCP payload
+      - name: Validation Check
         if: env.JSON_PAYLOAD_PATH != 'empty'
         run: |
           echo "Sending JSON payload to API"
@@ -110,7 +110,7 @@ jobs:
           message=$(echo "$response" | jq -r '.message // "No message provided"')
 
           if [ "$result_status" != "passed" ]; then
-            echo -e " ❌ Validation failed: \n \n"
+            echo -e " ❌ Validation failed: \n "
             echo -e " $message"
             exit 1
           fi

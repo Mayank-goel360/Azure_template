@@ -37,7 +37,7 @@ jobs:
           BASE="${{ github.event.pull_request.base.sha }}"
           HEAD="${{ github.event.pull_request.head.sha }}"
 
-          mapfile -t files < <(git diff --name-only "$BASE" "$HEAD" | grep -Ei '\.json$')
+          mapfile -t files < <(git diff --diff-filter=ACMR --name-only "$BASE" "$HEAD" | grep -Ei '\.json$')
           echo "→ All .json files: ${files[*]:-<none>}"
 
           if [ ${#files[@]} -eq 0 ]; then
@@ -110,7 +110,8 @@ jobs:
           message=$(echo "$response" | jq -r '.message // "No message provided"')
 
           if [ "$result_status" != "passed" ]; then
-            echo -e " ❌ Validation failed: \n \n"
+            echo -e "\n"
+            echo -e " ❌ Validation failed: \n"
             echo -e " $message"
             exit 1
           fi
