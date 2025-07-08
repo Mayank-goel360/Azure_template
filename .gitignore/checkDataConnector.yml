@@ -1,65 +1,143 @@
-# name: pull_request_target
+contexts:
+  - name: Body
+    when: "True"
+    require:
+      - type
+      - kind
+      - name
+      - apiVersion
+      - location
+      - properties.connectorUiConfig
 
-# on:
-#   pull_request_target:
-#     types: [opened, synchronize]
+  - name: type
+    when : "exists('type')"
+    equals:
+      type: "Microsoft.SecurityInsights/dataConnectorDefinitions"
 
-# jobs:
-#   send-json-files:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout PR code
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
-#           ref: ${{ github.event.pull_request.head.ref }}
-#           repository: ${{ github.event.pull_request.head.repo.full_name }}
+  - name: connectorUiConfig
+    when: "exists('properties.connectorUiConfig')"
+    require:
+      - properties.connectorUiConfig.title 
+      - properties.connectorUiConfig.publisher 
+      - properties.connectorUiConfig.descriptionMarkdown 
+      - properties.connectorUiConfig.sampleQueries
+      - properties.connectorUiConfig.graphQueries 
+      - properties.connectorUiConfig.dataTypes 
+      - properties.connectorUiConfig.connectivityCriteria
+      - properties.connectorUiConfig.permissions 
+      - properties.connectorUiConfig.instructionSteps
 
-#       - name: Get changed JSON files and contents to send to API endpoint
-#         id: prepare_json_files
-#         run: |
-#           echo "Collecting changed JSON files..."
-#           BASE="${{ github.event.pull_request.base.sha }}"
-#           HEAD="${{ github.event.pull_request.head.sha }}"
+    subcontexts:
 
-#           mapfile -t files < <(git diff --name-only "$BASE" "$HEAD" | grep '\.json$')
-#           echo "Changed JSON files: ${files[@]}"
+      - name: sampleQueries
+        when: "exists('properties.connectorUiConfig.sampleQueries')"
+        array:
+          path: "properties.connectorUiConfig.sampleQueries"
+          require:
+            - description
+            - query
 
-#           if [ ${#files[@]} -eq 0 ]; then
-#             echo "No JSON files changed in this PR."
-#             echo "JSON_PAYLOAD_PATH=empty" >> $GITHUB_ENV
-#             exit 0
-#           fi
+      - name: graphQueries
+        when: "exists('properties.connectorUiConfig.graphQueries')"
+        array:
+          path: "properties.connectorUiConfig.graphQueries"
+          require:
+          - metricName 
+          - legend
+          - baseQuery       
 
-#           json_array="["
-#           for file in "${files[@]}"; do
-#             if [ -f "$file" ]; then
-#               if jq -e . "$file" > /dev/null 2>&1; then
-#                 content=$(jq -c . < "$file")
-#                 json_array+="{\"filename\": \"${file}\", \"content\": $content},"
-#               else
-#                 echo "❌ Invalid JSON structure in file: $file"
-#                 exit 1
-#               fi
-#             fi
-#           done
-#           json_array="${json_array%,}]"
-#           echo "$json_array" > files_payload.json
-#           echo "JSON_PAYLOAD_PATH=files_payload.json" >> $GITHUB_ENV
+      - name: permissions
+        when : "exists('properties.connectorUiConfig.permissions.resourceProvider')"
+        array:
+          path: "properties.connectorUiConfig.permissions.resourceProvider"
+          require:
+              - provider
+              - providerDisplayName 
+              - permissionsDisplayText
+              - requiredPermissions 
+              - scope
 
-#       - name: Send JSON files to API and check response
-#         if: env.JSON_PAYLOAD_PATH != 'empty'
-#         env:
-#           API_URL: https://valid1-e2akhdekg6a7a2ch.canadacentral-01.azurewebsites.net/
-#         run: |
-#           echo "Sending JSON payload to API"
-#           response=$(curl -s -X POST "$API_URL" \
-#             -H "Content-Type: application/json" \
-#             --data-binary "@$JSON_PAYLOAD_PATH")
-#           status=$(jq -r '.status' <<< "$response")
-#           message=$(jq -r '.message' <<< "$response")
-#           if [ "$status" != "passed" ]; then
-#             echo "❌ Test Fail : $message"
-#             exit 1
-#           fi
-#           echo "✅ $message"
+      - name: dataTypes
+        when: "exists('properties.connectorUiConfig.dataTypes')"
+        array:
+          path: "properties.connectorUiConfig.dataTypes"
+          require:
+            - name
+            - lastDataReceivedQuery            
+
+      - name : connectivityCriteria
+        when: "exists('properties.connectorUiConfig.connectivityCriteria')"
+        array:
+          path: "properties.connectorUiConfig.connectivityCriteria"
+
+      - name: instructionSteps
+        array:
+          path: "properties.connectorUiConfig.instructionSteps"
+          require:
+            - instructions
+
+          subarray:
+            path: "instructions" ######################### leads form the relative path given in array
+            require:
+              - type
+
+            subcontexts:
+
+              - name: OAuthForm Instruction
+                when: "get('type') == 'OAuthForm'"
+                require:
+                  - parameters.disconnectButtonLabel
+                  - parameters.connectButtonLabel 
+                  - parameters.clientSecretLabel 
+                  - parameters.clientIdLabel
+
+              - name: ConnectionToggleButton Instruction
+                when: "get('type') == 'ConnectionToggleButton'"
+                require:
+                  - parameters.connectLabel 
+                  - parameters.name 
+
+              - name: CopyableLabel Instruction
+                when: "get('type') == 'CopyableLabel'"
+                require:
+                  - parameters.value
+                  - parameters.label
+
+              - name: Textbox Instruction
+                when: "get('type') == 'Textbox'"
+                require:
+                  - parameters.label 
+                  - parameters.placeholder 
+                  - parameters.name
+
+          
+
+
+
+
+
+
+
+
+
+
+
+# The rules.yml file defines validation rules for your JSON files. It tells your validator.py script:
+
+# When a rule should apply (when: clause)
+# What keys must be present (require: list)
+# What values must match exactly (equals: dictionary)
+# How to validate arrays of objects (array: and subarray: blocks)
+# Each rule is called a context, and contexts can be nested to validate substructures.
+
+
+#can have two require blocks can have two equal blocks also
+
+# Use exists('path') and get('path') in when: to control when a rule applies.
+# Use require: to enforce presence of keys.
+# Use equals: to enforce exact values.
+# Use array: and subarray: to validate lists of objects.
+# Nest subcontexts: to validate deeper structures.
+
+
+# subarray.path: This is the path to the nested array inside each item of the top-level array. Here:
