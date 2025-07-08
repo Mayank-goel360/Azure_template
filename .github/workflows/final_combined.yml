@@ -108,12 +108,17 @@ jobs:
 
           result_status=$(echo "$response" | jq -r '.status // empty')
           message=$(echo "$response" | jq -r '.message // "No message provided"')
+          id=$(echo "$response" | jq -r '.operation_Id // "No message provided"')
 
           if [ "$result_status" != "passed" ]; then
             echo -e "\n"
             echo -e " ❌ Validation failed: \n"
             echo -e " $message"
+            echo -e "\n"
+            echo "operation id is $id"
             exit 1
           fi
 
           echo "✅ $message"
+          echo -e "\n"
+          echo "operation id is $id"
