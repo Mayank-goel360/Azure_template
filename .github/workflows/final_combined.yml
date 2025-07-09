@@ -1,4 +1,4 @@
-name: CCP data connector validation 
+name: CCF data connector validation 
 
 on:
   pull_request_target:
@@ -99,7 +99,7 @@ jobs:
             exit 1
           fi
 
-      - name: POST CCP payload
+      - name: POST CCF payload
         if: env.JSON_PAYLOAD_PATH != 'empty'
         run: |
           echo "Sending JSON payload to API"
