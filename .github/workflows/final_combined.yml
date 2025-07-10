@@ -50,7 +50,7 @@ jobs:
 
           echo "→ JSON files: ${files[*]}"
 
-          # Build JSON array payload
+          
           json_array="["
           for f in "${files[@]}"; do
             if jq -e . "$f" > /dev/null; then
