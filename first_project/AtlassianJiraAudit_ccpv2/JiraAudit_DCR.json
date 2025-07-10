@@ -1,6 +1,6 @@
 {
     "name": "AtlassianJIRADCR",
-    "apiVersion": "2021-09-01-preview",
+    "apiVersion": "2021-preview",
     "type": "Microsoft.Insights/dataCollectionRules",
     "location": "{{location}}",
     "properties": {
