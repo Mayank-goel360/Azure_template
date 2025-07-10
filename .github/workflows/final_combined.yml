@@ -7,6 +7,8 @@ on:
     types:
       - opened
       - synchronize
+    paths:
+      - 'first_project/**'
 
 permissions:
   id-token: write
